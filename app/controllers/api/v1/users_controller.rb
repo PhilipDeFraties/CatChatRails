@@ -1,51 +1,41 @@
-class UsersController < ApplicationController
+class Api::V1::UsersController < ApplicationController
+  skip_before_action :authenticate_request, only: [:create]
+  before_action :set_user, only: [:show]
+  
   def index
     @users = User.all
        if @users
-          render json: {
-          users: @users
-       }
+          render json: @users
       else
-          render json: {
-          status: 500,
-          errors: ['no users found']
-      }
+        render json: { errors: ['no users found'] }, status: 500
      end
   end
 
   def show
-  @user = User.find(params[:id])
     if @user
-      render json: {
-      user: @user
-    }
+      render json: @user, status: :ok
     else
-      render json: {
-      status: 500,
-      errors: ['user not found']
-    }
+      render json: { status: 500 }, errors: ['user not found']
     end
   end
 
   def create
     @user = User.new(user_params)
     if @user.save
-      login!
-      render json: {
-        status: :created,
-        user: @user
-      }
+      token = jwt_encode(user_id: @user.id)
+      render json: { user: @user, accessToken: token }, status: :created
     else
-      render json: {
-        status: 500,
-        errors: @user.errors.full_messages
-      }
+      render json: { errors: @user.errors.full_messages },
+             status: :unprocessable_entity
     end
   end
 
   private
-  
   def user_params
-    params.require(:user).permit(:username, :password, :password_confirmation)
+    params.require(:user).permit(:username, :password)
+  end
+
+  def set_user
+    @user = User.find(params[:id])
   end
 end
