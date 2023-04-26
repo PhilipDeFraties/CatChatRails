@@ -1,17 +1,13 @@
 class User < ApplicationRecord
   has_secure_password
 
-  enum :role, [:user, :editor, :admin]
+  enum role: { admin: 0 }
+
+  validates :username, presence: true, uniqueness: true, length: { minimum: 4 }
+  validates :password, presence: true, length: { minimum: 6 }
+  # validates :email, presence: true, uniqueness: { case_sensitive: false }, format: { with: /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i }
 
   before_validation :downcase_email
-  VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
-  # validates :email, presence: true, format: { with: VALID_EMAIL_REGEX }, uniqueness: { case_sensitive: false }
-
-  validates :password, presence: true, length: { minimum: 6 }
-
-  validates :username, presence: true
-  validates :username, uniqueness: true
-  validates :username, length: { minimum: 4 }
 
   private
 
