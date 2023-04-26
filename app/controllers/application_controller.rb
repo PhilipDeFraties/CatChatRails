@@ -9,7 +9,11 @@ class ApplicationController < ActionController::Base
   def authenticate_request
     header = request.headers["Authorization"]
     header = header.split(" ").last if header
-    decoded = jwt_decode(header)
-    @current_user = User.find(decoded[:user_id])
+    begin
+      decoded = jwt_decode(header)
+    rescue JWT::DecodeError
+      raise ActiveRecord::RecordNotFound
+    end
+    @current_user = User.find_by_id(decoded[:user_id])
   end
 end
