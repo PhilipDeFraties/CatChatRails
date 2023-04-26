@@ -3,19 +3,20 @@ class Api::V1::UsersController < ApplicationController
   before_action :set_user, only: [:show]
 
   def index
-    @users = User.all
-       if @users
-          render json: @users
-      else
-        render json: { errors: ['no users found'] }, status: 500
-     end
+    users = User.all
+
+    if users.present?
+      render json: users, status: :ok
+    else
+      render json: { errors: ['no users found'] }, status: :not_found
+    end
   end
 
   def show
     if @user
       render json: @user, status: :ok
     else
-      render json: { status: 500 }, errors: ['user not found']
+      render json: { errors: ['user not found'] }, status: :not_found
     end
   end
 
@@ -31,11 +32,14 @@ class Api::V1::UsersController < ApplicationController
   end
 
   private
+
   def user_params
     params.require(:user).permit(:username, :password)
   end
 
   def set_user
     @user = User.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { errors: ['user not found'] }, status: :not_found
   end
 end
