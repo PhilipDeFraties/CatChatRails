@@ -20,7 +20,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_02_034655) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "email"
-    t.integer "role", default: 0
+    t.integer "role"
   end
 
 end
